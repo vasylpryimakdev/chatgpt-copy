@@ -1,4 +1,6 @@
 import React from "react";
+import { useSelector } from "react-redux";
+
 import Messages from "./Messages";
 import NewMessageInput from "./NewMessageInput";
 
@@ -11,12 +13,20 @@ const ChatLogo = () => {
 };
 
 const Chat = () => {
+  const selectedConversationId = useSelector(
+    (state) => state.dashboard.selectedConversationId
+  );
+
   return (
     <div className="chat_container">
-      <div className="chat_selected_container">
-        <Messages />
-        <NewMessageInput />
-      </div>
+      {!selectedConversationId ? (
+        <ChatLogo />
+      ) : (
+        <div className="chat_selected_container">
+          <Messages />
+          <NewMessageInput />
+        </div>
+      )}
     </div>
   );
 };
