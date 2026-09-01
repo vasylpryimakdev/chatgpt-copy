@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import Message from "./Message";
 
@@ -7,9 +7,17 @@ const Messages = () => {
     (state) => state.dashboard
   );
 
+  const scrollRef = useRef();
+
   const conversation = conversations.find(
     (c) => c.id === selectedConversationId
   );
+
+  const scrollToButton = () => {
+    scrollRef.current.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(scrollToButton, [conversation?.messages]);
 
   return (
     <div className="chat_messages_container">
@@ -21,6 +29,7 @@ const Messages = () => {
           animate={index === conversation.messages.length - 1 && m.aiMessage}
         />
       ))}
+      <div ref={scrollRef} />
     </div>
   );
 };
