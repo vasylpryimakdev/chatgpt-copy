@@ -14,6 +14,12 @@ const NewMessageInput = () => {
     (state) => state.dashboard.selectedConversationId
   );
 
+  const conversations = useSelector((state) => state.dashboard.conversations);
+
+  const selectedConversation = conversations.find(
+    (c) => c.id === selectedConversationId
+  );
+
   const proceedMessage = () => {
     const message = {
       aiMessage: false,
@@ -64,6 +70,12 @@ const NewMessageInput = () => {
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onKeyDown={handleKeyPressed}
+        disabled={
+          selectedConversation &&
+          !selectedConversation.messages[
+            selectedConversation.messages.length - 1
+          ].aiMessage
+        }
       />
       <div className="new_message_icon_container" onClick={handleSendMessage}>
         <BsSend color="grey" />
