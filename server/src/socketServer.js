@@ -1,5 +1,6 @@
 const { Server } = require("socket.io");
 const { v4: uuid } = require("uuid");
+const { getOpenai } = require("./ai");
 
 let sessions = {};
 
@@ -52,12 +53,41 @@ const sessionHistoryHandler = (socket, data) => {
   }
 };
 
-const conversationMessageHandler = (socket, data) => {
+const conversationMessageHandler = async (socket, data) => {
   const { sessionId, message, conversationId } = data;
 
+  const openai = getOpenai();
+
+  const previousConversationMessages = [];
+
   if (sessions[sessionId]) {
+    const existingConversation = sessions[sessionId].find(
+      (c) => c.id === conversationId
+    );
+
+    if (existingConversation) {
+      previousConversationMessages.push(
+        ...existingConversation.messages.map((m) => ({
+          content: m.content,
+          role: m.aiMessage ? "assistant" : "user",
+        }))
+      );
+    }
+
+    const response = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [
+        ...previousConversationMessages,
+        { role: "user", content: message.content },
+      ],
+    });
+
+    const aiMessageContent = response?.data?.choices[0]?.message?.content;
+
     const aiMessage = {
-      content: "Hello here is AI",
+      content: aiMessageContent
+        ? aiMessageContent
+        : "Error occurred when trying to get message from the AI",
       id: uuid(),
       aiMessage: true,
     };
